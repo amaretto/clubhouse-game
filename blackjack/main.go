@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -11,7 +12,7 @@ type Player struct {
 }
 
 const (
-	deck        = 2
+	deck        = 4
 	shuffleTime = 100
 )
 
@@ -25,6 +26,8 @@ func main() {
 	}
 	fmt.Println(cards)
 	shuffle(cards, cnum)
+	fmt.Println(cards)
+	game(cards)
 }
 
 func shuffle(cards []int, cnum int) {
@@ -34,4 +37,84 @@ func shuffle(cards []int, cnum int) {
 		b := rand.Intn(cnum)
 		cards[a], cards[b] = cards[b], cards[a]
 	}
+}
+
+func game(cards []int) {
+	var d, p Player
+	p.hand = append(p.hand, cards[0])
+	d.hand = append(d.hand, cards[1])
+	p.hand = append(p.hand, cards[2])
+	d.hand = append(d.hand, cards[3])
+	n := 4
+
+	// notify info
+	fmt.Println("\n\n/////Dealer/////")
+	fmt.Printf("%d,*\n", d.hand[0])
+
+	fmt.Println("/////You/////")
+	fmt.Println(join(p.hand))
+	fmt.Printf("Total : %d\n\n", count(p.hand))
+
+	// player turn
+	for {
+		fmt.Println("Hit(h)/Stand(s)?")
+		var input string
+		fmt.Scan(&input)
+		if input == "h" {
+			fmt.Println("card: ", cards[n])
+			p.hand = append(p.hand, cards[n])
+			n++
+			// do judge
+			fmt.Println("Total: ", join(count(p.hand)))
+		} else if input == "s" {
+			break
+		} else {
+			fmt.Println("invalid input")
+			continue
+		}
+	}
+
+	// dealer turn
+}
+
+func judege() {
+
+}
+
+func count(hands []int) []int {
+	var result []int
+	if hands[0] < 10 {
+		result = []int{hands[0]}
+	} else {
+		result = append(result, 10)
+	}
+	for i := 1; i < len(hands); i++ {
+		if hands[i] == 1 {
+			tmp := []int{}
+			for r := range result {
+				tmp = append(tmp, r+1)
+				tmp = append(tmp, r+11)
+			}
+			result = tmp
+		} else {
+			var delta int
+			if hands[i] < 10 {
+				delta = hands[i]
+			} else {
+				delta = 10
+			}
+			for j := 0; j < len(result); j++ {
+				result[j] += delta
+			}
+		}
+	}
+	return result
+}
+
+func join(cards []int) string {
+	result := strconv.Itoa(cards[0])
+	for i := 1; i < len(cards); i++ {
+		result += ", " + strconv.Itoa(cards[i])
+	}
+	return result
 }
