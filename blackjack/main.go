@@ -1,22 +1,37 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
 
 type Player struct {
 	hand []int
 }
 
-var (
-	deck = 2
+const (
+	deck        = 2
+	shuffleTime = 100
 )
 
 func main() {
-	cards := make([]int, deck*13)
-	for i := 0; i < 13; i++ {
-		cards[i] = i + 1
+	cnum := deck * 13
+
+	cards := make([]int, cnum)
+
+	for i := 0; i < cnum; i++ {
+		cards[i] = i%13 + 1
 	}
 	fmt.Println(cards)
+	shuffle(cards, cnum)
 }
 
-func shuffleCards(cards *[]int) {
+func shuffle(cards []int, cnum int) {
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < shuffleTime; i++ {
+		a := rand.Intn(cnum)
+		b := rand.Intn(cnum)
+		cards[a], cards[b] = cards[b], cards[a]
+	}
 }
