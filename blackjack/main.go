@@ -56,6 +56,7 @@ func game(cards []int) {
 	fmt.Printf("Total : %d\n\n", count(p.hand))
 
 	// player turn
+	pj := 0
 	for {
 		fmt.Println("Hit(h)/Stand(s)?")
 		var input string
@@ -65,7 +66,12 @@ func game(cards []int) {
 			p.hand = append(p.hand, cards[n])
 			n++
 			// do judge
-			fmt.Println("Total: ", join(count(p.hand)))
+			pj = judge(count(p.hand))
+			if pj == 0 || pj == 2 {
+				break
+			} else if pj == 1 {
+				continue
+			}
 		} else if input == "s" {
 			break
 		} else {
@@ -73,12 +79,26 @@ func game(cards []int) {
 			continue
 		}
 	}
+	fmt.Println("pj:", pj)
 
 	// dealer turn
 }
 
-func judege() {
-
+// 0:blackjuck, 1:continue, 2:burst
+func judge(counts []int) int {
+	burstCount := 0
+	for c := range counts {
+		if c > 21 {
+			burstCount++
+		} else if c == 21 {
+			return 0
+		}
+	}
+	if burstCount == len(counts) {
+		return 2
+	}
+	fmt.Println("continue")
+	return 1
 }
 
 func count(hands []int) []int {
@@ -108,6 +128,7 @@ func count(hands []int) []int {
 			}
 		}
 	}
+	fmt.Println("Total:", join(result))
 	return result
 }
 
