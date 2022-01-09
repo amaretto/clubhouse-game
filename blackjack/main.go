@@ -7,27 +7,36 @@ import (
 	"time"
 )
 
-type Player struct {
-	hand []int
-}
-
 const (
-	deck        = 4
+	deckNum     = 4
 	shuffleTime = 100
 )
 
-func main() {
-	cnum := deck * 13
+var (
+	n int
+)
 
+type Player struct {
+	hand   []int
+	result int
+	chip   int
+}
+
+type Deck struct {
+	n     int
+	cards []int
+}
+
+func main() {
+	cnum := deckNum * 13
 	cards := make([]int, cnum)
 
 	for i := 0; i < cnum; i++ {
 		cards[i] = i%13 + 1
 	}
-	fmt.Println(cards)
 	shuffle(cards, cnum)
-	fmt.Println(cards)
-	game(cards)
+
+	playGame(cards)
 }
 
 func shuffle(cards []int, cnum int) {
@@ -39,13 +48,15 @@ func shuffle(cards []int, cnum int) {
 	}
 }
 
-func game(cards []int) {
+func playGame(cards []int) {
 	var d, p Player
+
+	// ToDo: adopt multiple player
 	p.hand = append(p.hand, cards[0])
 	d.hand = append(d.hand, cards[1])
 	p.hand = append(p.hand, cards[2])
 	d.hand = append(d.hand, cards[3])
-	n := 4
+	n = 4
 
 	// notify info
 	fmt.Println("\n\n/////Dealer/////")
@@ -53,10 +64,9 @@ func game(cards []int) {
 
 	fmt.Println("/////You/////")
 	fmt.Println(join(p.hand))
-	fmt.Printf("Total : %d\n\n", count(p.hand))
+	fmt.Printf("Total : %d\n\n", countTotal(p.hand))
 
 	// player turn
-	pj := 0
 	for {
 		fmt.Println("Hit(h)/Stand(s)?")
 		var input string
@@ -66,28 +76,91 @@ func game(cards []int) {
 			p.hand = append(p.hand, cards[n])
 			n++
 			// do judge
-			pj = judge(count(p.hand))
-			if pj == 0 || pj == 2 {
+			pj := judgeHand(countTotal(p.hand))
+			if pj == 0 {
+				fmt.Println("Blackjack!")
+				p.result = 21
 				break
 			} else if pj == 1 {
 				continue
+			} else {
+				fmt.Println("Burst!!")
+				p.result = minCount(countTotal(p.hand))
+				break
 			}
 		} else if input == "s" {
+			p.result = maxCount(countTotal(p.hand))
 			break
 		} else {
 			fmt.Println("invalid input")
 			continue
 		}
 	}
-	fmt.Println("pj:", pj)
 
 	// dealer turn
+	dealerProcess(cards, &d)
+
+	judgeResult(p, d)
+}
+
+func playerProcess(cards []int, p Player) {
+	fmt.Println("\n\n------Player Turn------")
+
+}
+
+func dealerProcess(cards []int, d *Player) {
+	fmt.Println("\n\n------Delaler Turn------")
+
+	for {
+		currentMax := maxCount(countTotal(d.hand))
+		if currentMax >= 17 {
+			d.result = currentMax
+			return
+		}
+		d.hand = append(d.hand, cards[n])
+		n++
+	}
+}
+
+func printPlayerInfo(p Player) {
+
+}
+
+func maxCount(counts []int) int {
+	max := 0
+	for _, c := range counts {
+		if c > max {
+			max = c
+		}
+	}
+	return max
+}
+
+func minCount(counts []int) int {
+	min := 100
+	for _, c := range counts {
+		if c < min {
+			min = c
+		}
+	}
+	return min
+}
+
+func judgeResult(p, d Player) {
+	fmt.Printf("Player:%d, Delaer:%d\n", p.result, d.result)
+	if p.result > 21 && d.result > 21 || p.result == d.result {
+		fmt.Println("Draw")
+	} else if p.result <= 21 && (p.result > d.result || d.result > 21) {
+		fmt.Println("Player Win!")
+	} else {
+		fmt.Println("Delaer Win!")
+	}
 }
 
 // 0:blackjuck, 1:continue, 2:burst
-func judge(counts []int) int {
+func judgeHand(counts []int) int {
 	burstCount := 0
-	for c := range counts {
+	for _, c := range counts {
 		if c > 21 {
 			burstCount++
 		} else if c == 21 {
@@ -97,13 +170,14 @@ func judge(counts []int) int {
 	if burstCount == len(counts) {
 		return 2
 	}
-	fmt.Println("continue")
 	return 1
 }
 
-func count(hands []int) []int {
+func countTotal(hands []int) []int {
 	var result []int
-	if hands[0] < 10 {
+	if hands[0] == 1 {
+		result = []int{1, 11}
+	} else if hands[0] < 10 {
 		result = []int{hands[0]}
 	} else {
 		result = append(result, 10)
@@ -111,7 +185,7 @@ func count(hands []int) []int {
 	for i := 1; i < len(hands); i++ {
 		if hands[i] == 1 {
 			tmp := []int{}
-			for r := range result {
+			for _, r := range result {
 				tmp = append(tmp, r+1)
 				tmp = append(tmp, r+11)
 			}
