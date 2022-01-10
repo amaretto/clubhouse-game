@@ -2,163 +2,210 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"strconv"
 	"time"
 )
 
 const (
+	// game
+	roundNum  = 3
+	playerNum = 1
+	// deck
 	deckNum     = 4
 	shuffleTime = 100
 )
 
-var (
-	n int
-)
+type Game struct {
+	dealer   Dealer
+	players  []Player
+	roundNum int
+	deck     Deck
+}
 
 type Player struct {
 	name   string
 	hand   []int
 	result int
 	chip   int
+	com    bool
 }
 
 type Dealer struct {
 	Player
-}
-
-type Deck struct {
-	n     int
-	cards []int
-}
-
-type Game struct {
-	round int
+	game *Game
 }
 
 func main() {
-	cnum := deckNum * 13
-	cards := make([]int, cnum)
+	g := Game{}
+	g.dealer = Dealer{Player{name: "Dealer"}, &g}
+	g.players = []Player{Player{name: "A"}}
+	g.roundNum = roundNum
+	g.deck = createDeck(deckNum, shuffleTime)
 
-	for i := 0; i < cnum; i++ {
-		cards[i] = i%13 + 1
-	}
-	shuffle(cards, cnum)
-
-	playGame(cards)
+	g.playGame()
 }
 
-func shuffle(cards []int, cnum int) {
-	rand.Seed(time.Now().UnixNano())
-	for i := 0; i < shuffleTime; i++ {
-		a := rand.Intn(cnum)
-		b := rand.Intn(cnum)
-		cards[a], cards[b] = cards[b], cards[a]
-	}
-}
-
-func playGame(cards []int) {
-	var d, p Player
-
-	// ToDo: adopt multiple player
-	p.hand = append(p.hand, cards[0])
-	d.hand = append(d.hand, cards[1])
-	p.hand = append(p.hand, cards[2])
-	d.hand = append(d.hand, cards[3])
-	n = 4
-
-	// notify info
+func (g *Game) playGame() {
 	fmt.Printf("\x1b[32m")
-	fmt.Printf("///////////////////////////////\n")
-	fmt.Printf("//////////start game!//////////\n")
-	fmt.Printf("///////////////////////////////\n")
+	fmt.Printf("/////////////////////////////////\n")
+	fmt.Printf("////////// game start! //////////\n")
+	fmt.Printf("/////////////////////////////////\n")
 	fmt.Printf("\x1b[0m")
 
+	delay()
+
+	for i := 0; i < g.roundNum; i++ {
+		fmt.Printf("\x1b[32m")
+		fmt.Printf("\n\n----- Round %d -----\n", i+1)
+		fmt.Printf("\x1b[0m")
+		g.deck.shuffle()
+		g.round()
+	}
+	// ToDo: judge total results
+}
+
+func (g *Game) round() {
+	delay()
+	g.dealer.dealCards()
+	g.dealer.showDealerHands()
+	delay()
+	g.dealer.processPlayers()
+	delay()
+	g.dealer.processDealer()
+	delay()
+	g.dealer.judgeResults()
+}
+
+func (d *Dealer) dealCards() {
+	d.hand = []int{}
+	for i := 0; i < len(d.game.players); i++ {
+		d.game.players[i].hand = []int{}
+	}
+	for i := 0; i < 2; i++ {
+		d.hand = append(d.hand, d.game.deck.draw())
+		for j := 0; j < len(d.game.players); j++ {
+			d.game.players[j].hand = append(d.game.players[j].hand, d.game.deck.draw())
+		}
+	}
+}
+
+func (d *Dealer) showDealerHands() {
 	fmt.Printf("\x1b[31m")
-	fmt.Println("\n/////Dealer Hand/////")
-	fmt.Printf("Cards: %d,*\n", d.hand[0])
+	fmt.Println("\n///// Dealer Hands /////")
+	fmt.Printf("Cards: %d, *\n", d.hand[0])
 	fmt.Printf("\x1b[0m")
+}
 
-	fmt.Printf("\x1b[34m")
-	fmt.Println("\n//////Your Hand//////")
-	fmt.Println("Cards: " + joinHands(p.hand))
-	fmt.Printf("Total: %d\n\n", countTotal(p.hand))
-
-	// player turn
+func (d *Dealer) processPlayers() {
 	var input string
-	fmt.Println("\n//////Your Turn!!//////\n")
-	for {
-		fmt.Println("Hit(h)/Stand(s)?")
-		fmt.Scan(&input)
-		if input == "h" {
-			fmt.Println("New Card: ", cards[n])
-			p.hand = append(p.hand, cards[n])
-			n++
-			fmt.Println("Your Hands: ", joinHands(p.hand))
-			// do judge
+	var newCard int
+	var p *Player
+	for i := 0; i < len(d.game.players); i++ {
+		p = &d.game.players[i]
+		fmt.Printf("\x1b[34m")
+		fmt.Printf("\n\n////// Player %s Turn!! //////\n", p.name)
+		for {
+			fmt.Printf("Player %s Hand: %s\n", p.name, joinHands(p.hand))
+
 			pj := judgeHand(countTotal(p.hand))
 			if pj == 0 {
 				fmt.Println("Player Total: Blackjack!!!")
 				p.result = 21
+				fmt.Printf("\x1b[0m")
 				break
 			} else if pj == 1 {
 				fmt.Println("Player Total:", countTotal(p.hand))
-				continue
 			} else {
 				fmt.Println("Player Total: Bursted...")
 				p.result = minCount(countTotal(p.hand))
+				fmt.Printf("\x1b[0m")
 				break
 			}
-		} else if input == "s" {
-			p.result = maxCount(countTotal(p.hand))
-			fmt.Println("\nPlayer Total:", p.result)
-			break
-		} else {
-			fmt.Println("invalid input")
-			continue
+
+			fmt.Println("Hit(h)/Stand(s)?")
+			fmt.Scan(&input)
+
+			if input == "h" {
+				newCard = d.game.deck.draw()
+				fmt.Println("New Card: ", newCard)
+				p.hand = append(p.hand, newCard)
+			} else if input == "s" {
+				p.result = maxAvailableCount(countTotal(p.hand))
+				fmt.Println("\nPlayer Total:", p.result)
+				fmt.Printf("\x1b[0m")
+				break
+			} else {
+				fmt.Println("invalid input")
+				continue
+			}
 		}
 	}
-	fmt.Printf("\x1b[0m")
-
-	// dealer turn
-	dealerProcess(cards, &d)
-
-	judgeResult(p, d)
 }
 
-func playerProcess(cards []int, p Player) {
-	fmt.Println("\n\n------Player Turn------")
-
-}
-
-func dealerProcess(cards []int, d *Player) {
+func (d *Dealer) processDealer() {
+	var newCard int
 	fmt.Printf("\x1b[31m")
-	fmt.Println("\n\n//////Dealer Turn!//////")
-
+	fmt.Println("\n\n////// Dealer Turn! //////")
 	for {
 		fmt.Println("Delaer Hand:", joinHands(d.hand))
-		time.Sleep(1 * time.Second)
-		currentMax := maxCount(countTotal(d.hand))
-		if currentMax >= 17 {
-			d.result = currentMax
-			fmt.Println("Dealer Total:", d.result)
+		delay()
+
+		dj := judgeHand(countTotal(d.hand))
+		if dj == 0 {
+			fmt.Println("Dealer Black Jack!!")
 			fmt.Printf("\x1b[0m")
+			d.result = 21
+			return
+		} else if dj == 1 {
+			currentMax := maxAvailableCount(countTotal(d.hand))
+			if currentMax <= 21 && currentMax >= 17 {
+				d.result = currentMax
+				fmt.Println("\nDelaer Total:", d.result)
+				fmt.Printf("\x1b[0m")
+				return
+			}
+			fmt.Println("\nDelaer Total:", countTotal(d.hand))
+		} else {
+			fmt.Println("Dealer Bursted..")
+			fmt.Printf("\x1b[0m")
+			d.result = minCount(countTotal(d.hand))
 			return
 		}
-		fmt.Println("New Card: ", cards[n])
-		d.hand = append(d.hand, cards[n])
-		n++
+		newCard = d.game.deck.draw()
+		fmt.Println("New Card: ", newCard)
+		d.hand = append(d.hand, newCard)
 	}
 }
 
-func printPlayerInfo(p Player) {
+func (d *Dealer) judgeResults() {
+	fmt.Printf("\n\n//////   Judge!   //////\n")
+	delay()
 
+	fmt.Printf("\nDealer Total:%d", d.result)
+
+	var p Player
+	for i := 0; i < len(d.game.players); i++ {
+		delay()
+		p = d.game.players[i]
+		fmt.Printf("\n\nPlayer %s Total: %d\n", p.name, p.result)
+		delay()
+		if p.result > 21 && d.result > 21 || p.result == d.result {
+			fmt.Printf("\nPlayer %s Draw\n", p.name)
+		} else if p.result <= 21 && (p.result > d.result || d.result > 21) {
+			fmt.Printf("\nPlayer %s Win!\n", p.name)
+			// ToDo: process chip
+		} else {
+			fmt.Printf("\nPlayer %s Lose...\n", p.name)
+			// ToDo: process chip
+		}
+	}
+	delay()
 }
 
-func maxCount(counts []int) int {
+func maxAvailableCount(counts []int) int {
 	max := 0
 	for _, c := range counts {
-		if c > max {
+		if c > max && 21 >= c {
 			max = c
 		}
 	}
@@ -175,9 +222,9 @@ func minCount(counts []int) int {
 	return min
 }
 
-func judgeResult(p, d Player) {
+func judgeResult(p Player, d Dealer) {
 	time.Sleep(1 * time.Second)
-	fmt.Println("\n\n//////   Judge!   //////\n")
+	fmt.Println("\n\n//////   Judge!   //////")
 	time.Sleep(1 * time.Second)
 	fmt.Printf("Player:%d, Dealer:%d\n\n", p.result, d.result)
 	time.Sleep(1 * time.Second)
@@ -237,6 +284,10 @@ func countTotal(hands []int) []int {
 		}
 	}
 	return result
+}
+
+func delay() {
+	time.Sleep(1 * time.Second)
 }
 
 func joinHands(cards []int) string {
