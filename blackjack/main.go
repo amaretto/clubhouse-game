@@ -109,7 +109,7 @@ func playerProcess(cards []int, p Player) {
 }
 
 func dealerProcess(cards []int, d *Player) {
-	fmt.Println("\n\n------Delaler Turn------")
+	fmt.Println("\n\n------Dealer Turn------")
 
 	for {
 		currentMax := maxCount(countTotal(d.hand))
@@ -147,13 +147,13 @@ func minCount(counts []int) int {
 }
 
 func judgeResult(p, d Player) {
-	fmt.Printf("Player:%d, Delaer:%d\n", p.result, d.result)
+	fmt.Printf("Player:%d, Dealer:%d\n", p.result, d.result)
 	if p.result > 21 && d.result > 21 || p.result == d.result {
 		fmt.Println("Draw")
 	} else if p.result <= 21 && (p.result > d.result || d.result > 21) {
 		fmt.Println("Player Win!")
 	} else {
-		fmt.Println("Delaer Win!")
+		fmt.Println("Dealer Win!")
 	}
 }
 
