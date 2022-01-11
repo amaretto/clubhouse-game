@@ -13,7 +13,7 @@ type Deck struct {
 
 func createDeck(deckNum, shuffleTime int) Deck {
 	deck := Deck{}
-	cnum := deckNum * 13
+	cnum := deckNum * 13 * 4
 
 	deck.cards = make([]int, cnum)
 	deck.shuffleTime = shuffleTime
