@@ -5,17 +5,17 @@ import (
 	"time"
 )
 
-func maxAvailableCount(counts []int) int {
+func maxAvailableSum(sums []int) int {
 	max := 0
-	for _, c := range counts {
-		if c > max && 21 >= c {
-			max = c
+	for _, sum := range sums {
+		if sum > max && 21 >= sum {
+			max = sum
 		}
 	}
 	return max
 }
 
-func minCount(counts []int) int {
+func minOverSum(counts []int) int {
 	min := 100
 	for _, c := range counts {
 		if c < min {
@@ -25,37 +25,30 @@ func minCount(counts []int) int {
 	return min
 }
 
-func countTotal(hands []int) []int {
-	var result []int
-	if hands[0] == 1 {
-		result = []int{1, 11}
-	} else if hands[0] < 10 {
-		result = []int{hands[0]}
-	} else {
-		result = append(result, 10)
-	}
+func calcSums(hands []int) []int {
+	sums := []int{0}
+	var d int
 
-	for i := 1; i < len(hands); i++ {
+	for i := 0; i < len(hands); i++ {
 		if hands[i] == 1 {
 			tmp := []int{}
-			for _, r := range result {
+			for _, r := range sums {
 				tmp = append(tmp, r+1)
 				tmp = append(tmp, r+11)
 			}
-			result = tmp
+			sums = tmp
 		} else {
-			var delta int
 			if hands[i] < 10 {
-				delta = hands[i]
+				d = hands[i]
 			} else {
-				delta = 10
+				d = 10
 			}
-			for j := 0; j < len(result); j++ {
-				result[j] += delta
+			for j := 0; j < len(sums); j++ {
+				sums[j] += d
 			}
 		}
 	}
-	return result
+	return sums
 }
 
 func delay() {
@@ -87,16 +80,16 @@ func joinHands(cards []int) string {
 }
 
 // 0:blackjuck, 1:continue, 2:burst
-func judgeHand(counts []int) int {
+func checkSums(sums []int) int {
 	burstCount := 0
-	for _, c := range counts {
+	for _, c := range sums {
 		if c > 21 {
 			burstCount++
 		} else if c == 21 {
 			return 0
 		}
 	}
-	if burstCount == len(counts) {
+	if burstCount == len(sums) {
 		return 2
 	}
 	return 1

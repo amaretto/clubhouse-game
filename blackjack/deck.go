@@ -25,9 +25,9 @@ func createDeck(deckNum, shuffleTime int) Deck {
 }
 
 func (d *Deck) draw() int {
-	result := d.cards[d.pos]
+	newCard := d.cards[d.pos]
 	d.pos++
-	return result
+	return newCard
 }
 
 func (d *Deck) shuffle() {

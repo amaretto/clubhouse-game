@@ -23,7 +23,7 @@ func (d *Dealer) dealCards() {
 func (d *Dealer) showDealerHands() {
 	fmt.Printf("\x1b[31m")
 	fmt.Println("\n///// Dealer Hands /////")
-	fmt.Printf("Cards: %d, *\n", d.hand[0])
+	fmt.Printf("DealerHands: %d, *\n", d.hand[0])
 	fmt.Printf("\x1b[0m")
 }
 
@@ -38,17 +38,17 @@ func (d *Dealer) processPlayers() {
 		for {
 			fmt.Printf("Player %s Hand: %s\n", p.name, joinHands(p.hand))
 
-			pj := judgeHand(countTotal(p.hand))
+			pj := checkSums(calcSums(p.hand))
 			if pj == 0 {
 				fmt.Println("Player Total: Blackjack!!!")
 				p.result = 21
 				fmt.Printf("\x1b[0m")
 				break
 			} else if pj == 1 {
-				fmt.Println("Player Total:", countTotal(p.hand))
+				fmt.Println("Player Total:", calcSums(p.hand))
 			} else {
 				fmt.Println("Player Total: Bursted...")
-				p.result = minCount(countTotal(p.hand))
+				p.result = minOverSum(calcSums(p.hand))
 				fmt.Printf("\x1b[0m")
 				break
 			}
@@ -61,7 +61,7 @@ func (d *Dealer) processPlayers() {
 				fmt.Println("New Card: ", newCard)
 				p.hand = append(p.hand, newCard)
 			} else if input == "s" {
-				p.result = maxAvailableCount(countTotal(p.hand))
+				p.result = maxAvailableSum(calcSums(p.hand))
 				fmt.Println("\nPlayer Total:", p.result)
 				fmt.Printf("\x1b[0m")
 				break
@@ -81,25 +81,25 @@ func (d *Dealer) processDealer() {
 		fmt.Println("Delaer Hand:", joinHands(d.hand))
 		delay()
 
-		dj := judgeHand(countTotal(d.hand))
+		dj := checkSums(calcSums(d.hand))
 		if dj == 0 {
 			fmt.Println("Dealer Black Jack!!")
 			fmt.Printf("\x1b[0m")
 			d.result = 21
 			return
 		} else if dj == 1 {
-			currentMax := maxAvailableCount(countTotal(d.hand))
+			currentMax := maxAvailableSum(calcSums(d.hand))
 			if currentMax <= 21 && currentMax >= 17 {
 				d.result = currentMax
 				fmt.Println("\nDelaer Total:", d.result)
 				fmt.Printf("\x1b[0m")
 				return
 			}
-			fmt.Println("\nDelaer Total:", countTotal(d.hand))
+			fmt.Println("\nDelaer Total:", calcSums(d.hand))
 		} else {
 			fmt.Println("Dealer Bursted..")
 			fmt.Printf("\x1b[0m")
-			d.result = minCount(countTotal(d.hand))
+			d.result = minOverSum(calcSums(d.hand))
 			return
 		}
 		newCard = d.game.deck.draw()
