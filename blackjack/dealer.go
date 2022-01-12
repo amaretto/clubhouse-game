@@ -7,9 +7,24 @@ type Dealer struct {
 	game *Game
 }
 
+func (d *Dealer) confirmBet() {
+	var input string
+	for i := 0; i < len(d.game.players); i++ {
+		p := d.game.players[i]
+		fmt.Printf("Player %s JOIN GAME?(y/n)\n", p.name)
+		fmt.Scan(&input)
+		if input == "y" {
+			p.status = 1
+		} else {
+			p.status = 2
+		}
+	}
+}
+
 func (d *Dealer) dealCards() {
 	d.hand = []int{}
 	for i := 0; i < len(d.game.players); i++ {
+		d.game.players[i].status = 0
 		d.game.players[i].hand = []int{}
 	}
 	for i := 0; i < 2; i++ {
@@ -35,8 +50,20 @@ func (d *Dealer) processPlayers() {
 		p = &d.game.players[i]
 		fmt.Printf("\x1b[34m")
 		fmt.Printf("\n\n////// Player %s Turn!! //////\n", p.name)
+
 		for {
 			fmt.Printf("Player %s Hand: %s\n", p.name, joinHands(p.hand))
+			if p.status == 0 {
+				fmt.Println("Continue the game?: y/n(surrender)")
+				fmt.Scan(&input)
+
+				if input == "y" {
+					p.status = 1
+				} else {
+					p.status = 3
+					return
+				}
+			}
 
 			pj := checkSums(calcSums(p.hand))
 			if pj == 0 {

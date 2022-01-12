@@ -6,4 +6,5 @@ type Player struct {
 	result int
 	chip   int
 	com    bool
+	status int //joined:1, skipped:2, surrendered:3
 }

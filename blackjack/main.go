@@ -53,7 +53,7 @@ func (g *Game) round() {
 
 func main() {
 	g := Game{}
-	g.dealer = Dealer{Player{name: "Dealer"}, &g}
+	g.dealer = Dealer{Player{name: "Dealer", chip: 1000000}, &g}
 	g.players = []Player{Player{name: "A"}}
 
 	g.roundNum = roundNum
