@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type Dealer struct {
 	Player
@@ -9,11 +12,25 @@ type Dealer struct {
 
 func (d *Dealer) confirmBet() {
 	var input string
+	var p *Player
 	for i := 0; i < len(d.game.players); i++ {
-		p := d.game.players[i]
-		fmt.Printf("Player %s JOIN GAME?(y/n)\n", p.name)
+		p = &d.game.players[i]
+		if p.chip == 0 {
+			continue
+		}
+		fmt.Printf("Player %s, JOIN THIS GAME?(y/n)\n", p.name)
 		fmt.Scan(&input)
 		if input == "y" {
+			for {
+				fmt.Printf("Player %s, PLEASE ENTER THE BET(max:%d)\n", p.name, p.chip)
+				fmt.Scan(&input)
+				if bet, err := strconv.Atoi(input); err == nil {
+					p.bet = bet
+					p.chip -= bet
+					break
+				}
+				fmt.Printf("Invalid\n")
+			}
 			p.status = 1
 		} else {
 			p.status = 2
@@ -53,13 +70,11 @@ func (d *Dealer) processPlayers() {
 
 		for {
 			fmt.Printf("Player %s Hand: %s\n", p.name, joinHands(p.hand))
-			if p.status == 0 {
+			if p.status == 1 {
 				fmt.Println("Continue the game?: y/n(surrender)")
 				fmt.Scan(&input)
 
-				if input == "y" {
-					p.status = 1
-				} else {
+				if input == "n" {
 					p.status = 3
 					return
 				}
@@ -141,21 +156,24 @@ func (d *Dealer) judgeResults() {
 
 	fmt.Printf("\nDealer Total:%d", d.result)
 
-	var p Player
+	var p *Player
 	for i := 0; i < len(d.game.players); i++ {
 		delay()
-		p = d.game.players[i]
+		p = &d.game.players[i]
 		fmt.Printf("\n\nPlayer %s Total: %d\n", p.name, p.result)
 		delay()
 		if p.result > 21 && d.result > 21 || p.result == d.result {
 			fmt.Printf("\nPlayer %s Draw\n", p.name)
+			p.chip += p.bet
 		} else if p.result <= 21 && (p.result > d.result || d.result > 21) {
 			fmt.Printf("\nPlayer %s Win!\n", p.name)
-			// ToDo: process chip
+			p.chip += p.bet * 2
+			d.chip -= p.bet * 2
 		} else {
 			fmt.Printf("\nPlayer %s Lose...\n", p.name)
-			// ToDo: process chip
+			d.chip += p.bet
 		}
+		p.bet = 0
 	}
 	delay()
 }

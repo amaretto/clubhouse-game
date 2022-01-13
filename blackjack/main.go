@@ -36,11 +36,23 @@ func (g *Game) playGame() {
 		g.deck.shuffle()
 		g.round()
 	}
-	// ToDo: judge total results
+
+	var p *Player
+	for i := 0; i < len(g.players); i++ {
+		p = &g.players[i]
+		if p.chip > 1000 {
+			fmt.Printf("Player %s won $%d\n", p.name, p.chip-1000)
+		} else if p.chip == 1000 {
+			fmt.Printf("Player %s chip don't change\n", p.name)
+		} else {
+			fmt.Printf("Player %s lose $%d\n", p.name, 1000-p.chip)
+		}
+	}
 }
 
 func (g *Game) round() {
 	delay()
+	g.dealer.confirmBet()
 	g.dealer.dealCards()
 	g.dealer.showDealerHands()
 	delay()
@@ -54,7 +66,7 @@ func (g *Game) round() {
 func main() {
 	g := Game{}
 	g.dealer = Dealer{Player{name: "Dealer", chip: 1000000}, &g}
-	g.players = []Player{Player{name: "A"}}
+	g.players = []Player{Player{name: "A", chip: 1000}}
 
 	g.roundNum = roundNum
 	g.deck = createDeck(deckNum, shuffleTime)
