@@ -18,7 +18,7 @@ func (d *Dealer) confirmBet() {
 		if p.chip == 0 {
 			continue
 		}
-		fmt.Printf("Player %s, JOIN THIS GAME?(y/n)\n", p.name)
+		fmt.Printf("Player %s has $%d, JOIN THIS GAME?(y/n)\n", p.name, p.chip)
 		fmt.Scan(&input)
 		if input == "y" {
 			for {
