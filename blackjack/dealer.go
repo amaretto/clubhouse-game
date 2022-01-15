@@ -87,7 +87,7 @@ func (d *Dealer) processPlayers() {
 				fmt.Printf("\x1b[0m")
 				break
 			} else if pj == 1 {
-				fmt.Println("Player Total:", calcSums(p.hand))
+				fmt.Println("Player Total:", joinSums(calcSums(p.hand)))
 			} else {
 				fmt.Println("Player Total: Bursted...")
 				p.result = minOverSum(calcSums(p.hand))
@@ -100,7 +100,7 @@ func (d *Dealer) processPlayers() {
 
 			if input == "h" {
 				newCard = d.game.deck.draw()
-				fmt.Println("New Card: ", newCard)
+				fmt.Println("New Card: ", convCardNum(newCard))
 				p.hand = append(p.hand, newCard)
 			} else if input == "s" {
 				p.result = maxAvailableSum(calcSums(p.hand))
@@ -137,7 +137,7 @@ func (d *Dealer) processDealer() {
 				fmt.Printf("\x1b[0m")
 				return
 			}
-			fmt.Println("\nDelaer Total:", calcSums(d.hand))
+			fmt.Println("\nDelaer Total:", joinSums(calcSums(d.hand)))
 		} else {
 			fmt.Println("Dealer Bursted..")
 			fmt.Printf("\x1b[0m")

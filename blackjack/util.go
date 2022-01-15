@@ -55,25 +55,39 @@ func delay() {
 	time.Sleep(1 * time.Second)
 }
 
+func convCardNum(cardNum int) string {
+	var result string
+	if cardNum < 11 {
+		result = strconv.Itoa(cardNum)
+	} else if cardNum == 11 {
+		result = "J"
+	} else if cardNum == 12 {
+		result = "Q"
+	} else {
+		result = "K"
+	}
+	return result
+}
+
 func joinHands(cards []int) string {
 	var result string
 	for i := 0; i < len(cards); i++ {
-		var tmp string
-		if cards[i] < 11 {
-			tmp = strconv.Itoa(cards[i])
-		} else {
-			if cards[i] == 11 {
-				tmp = "J"
-			} else if cards[i] == 12 {
-				tmp = "Q"
-			} else {
-				tmp = "K"
-			}
-		}
 		if result == "" {
-			result = tmp
+			result = convCardNum(cards[i])
 		} else {
-			result += ", " + tmp
+			result += ", " + convCardNum(cards[i])
+		}
+	}
+	return result
+}
+
+func joinSums(sums []int) string {
+	var result string
+	for i := 0; i < len(sums); i++ {
+		if result == "" {
+			result = strconv.Itoa(sums[i])
+		} else {
+			result += "," + strconv.Itoa(sums[i])
 		}
 	}
 	return result
