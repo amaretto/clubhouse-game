@@ -5,10 +5,19 @@ import (
 	"time"
 )
 
+var (
+	suits = map[int]string{0: "spade", 1: "club", 2: "diamond", 3: "heart"}
+)
+
 type Deck struct {
 	pos         int
 	shuffleTime int
 	cards       []int
+}
+
+type Card struct {
+	int
+	suit int //0:spade, 1:club, 2:diamond, 3:heart
 }
 
 func createDeck(deckNum, shuffleTime int) Deck {
