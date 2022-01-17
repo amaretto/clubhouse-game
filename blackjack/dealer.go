@@ -39,10 +39,10 @@ func (d *Dealer) confirmBet() {
 }
 
 func (d *Dealer) dealCards() {
-	d.hand = []int{}
+	d.hand = []Card{}
 	for i := 0; i < len(d.game.players); i++ {
 		d.game.players[i].status = 0
-		d.game.players[i].hand = []int{}
+		d.game.players[i].hand = []Card{}
 	}
 	for i := 0; i < 2; i++ {
 		d.hand = append(d.hand, d.game.deck.draw())
@@ -61,7 +61,7 @@ func (d *Dealer) showDealerHands() {
 
 func (d *Dealer) processPlayers() {
 	var input string
-	var newCard int
+	var newCard Card
 	var p *Player
 	for i := 0; i < len(d.game.players); i++ {
 		p = &d.game.players[i]
@@ -100,7 +100,7 @@ func (d *Dealer) processPlayers() {
 
 			if input == "h" {
 				newCard = d.game.deck.draw()
-				fmt.Println("New Card: ", convCardNum(newCard))
+				fmt.Println("New Card: ", convCardNum(newCard.num))
 				p.hand = append(p.hand, newCard)
 			} else if input == "s" {
 				p.result = maxAvailableSum(calcSums(p.hand))
@@ -116,7 +116,7 @@ func (d *Dealer) processPlayers() {
 }
 
 func (d *Dealer) processDealer() {
-	var newCard int
+	var newCard Card
 	fmt.Printf("\x1b[31m")
 	fmt.Println("\n\n////// Dealer Turn! //////")
 	for {

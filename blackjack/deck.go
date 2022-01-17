@@ -12,28 +12,30 @@ var (
 type Deck struct {
 	pos         int
 	shuffleTime int
-	cards       []int
+	cards       []Card
 }
 
 type Card struct {
-	int
+	num  int
 	suit int //0:spade, 1:club, 2:diamond, 3:heart
 }
 
 func createDeck(deckNum, shuffleTime int) Deck {
 	deck := Deck{}
 	cnum := deckNum * 13 * 4
+	var num, suit int
 
-	deck.cards = make([]int, cnum)
+	deck.cards = make([]Card, cnum)
 	deck.shuffleTime = shuffleTime
-
 	for i := 0; i < cnum; i++ {
-		deck.cards[i] = i%13 + 1
+		num = i%13 + 1
+		suit = i / 13
+		deck.cards[i] = Card{num, suit}
 	}
 	return deck
 }
 
-func (d *Deck) draw() int {
+func (d *Deck) draw() Card {
 	newCard := d.cards[d.pos]
 	d.pos++
 	return newCard

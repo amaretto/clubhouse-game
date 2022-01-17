@@ -25,12 +25,12 @@ func minOverSum(counts []int) int {
 	return min
 }
 
-func calcSums(hands []int) []int {
+func calcSums(hands []Card) []int {
 	sums := []int{0}
 	var d int
 
 	for i := 0; i < len(hands); i++ {
-		if hands[i] == 1 {
+		if hands[i].num == 1 {
 			tmp := []int{}
 			for _, r := range sums {
 				tmp = append(tmp, r+1)
@@ -38,8 +38,8 @@ func calcSums(hands []int) []int {
 			}
 			sums = tmp
 		} else {
-			if hands[i] < 10 {
-				d = hands[i]
+			if hands[i].num < 10 {
+				d = hands[i].num
 			} else {
 				d = 10
 			}
@@ -69,13 +69,13 @@ func convCardNum(cardNum int) string {
 	return result
 }
 
-func joinHands(cards []int) string {
+func joinHands(cards []Card) string {
 	var result string
 	for i := 0; i < len(cards); i++ {
 		if result == "" {
-			result = convCardNum(cards[i])
+			result = convCardNum(cards[i].num)
 		} else {
-			result += ", " + convCardNum(cards[i])
+			result += ", " + convCardNum(cards[i].num)
 		}
 	}
 	return result
