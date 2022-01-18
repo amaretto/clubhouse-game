@@ -23,7 +23,7 @@ type Game struct {
 func (g *Game) playGame() {
 	fmt.Printf("\x1b[32m")
 	fmt.Printf("/////////////////////////////////\n")
-	fmt.Printf("////////// game start! //////////\n")
+	fmt.Printf("////////// GAME START! //////////\n")
 	fmt.Printf("/////////////////////////////////\n")
 	fmt.Printf("\x1b[0m")
 
