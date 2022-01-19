@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/rivo/tview"
 )
 
 const (
@@ -14,6 +16,9 @@ const (
 )
 
 type Game struct {
+	app *tview.Application
+	ui  *tview.Flex
+
 	dealer   Dealer
 	players  []Player
 	roundNum int
