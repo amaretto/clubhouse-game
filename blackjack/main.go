@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/rivo/tview"
@@ -28,15 +27,7 @@ type Game struct {
 }
 
 func (g *Game) playGame() {
-	fmt.Printf("\x1b[32m")
-	fmt.Printf("/////////////////////////////////\n")
-	fmt.Printf("////////// GAME START! //////////\n")
-	fmt.Printf("/////////////////////////////////\n")
-	fmt.Printf("\x1b[0m")
-
-	delay()
-
-	g.ui2.SetBorder(true)
+	g.ui2.SetBorder(true).SetTitle("BlackJack")
 	g.ui.AddItem(g.ui2, 0, 1, false)
 	go func() {
 		for {
